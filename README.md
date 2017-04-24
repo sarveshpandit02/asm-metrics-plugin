@@ -1,12 +1,12 @@
 # asm-metrics-plugin
 Steps to generate static analysis:
 
-1) Build asm-metrics-plugin inside the directory linked above
+1) Build metrics-maven-plugin inside the directory linked above
      mvn clean install
 
-2) Download/clone any project where you want to run static analysis plugin. (e.g: common-dbutils)
+2) Download/clone any project where you want to run metrics-maven-plugin. (e.g: common-dbutils)
 
-3) Add code-analysis plugin to project pom under ```<build><plugins>```.
+3) Add metrics-maven-plugin plugin to project pom under ```<build><plugins>```.
 
 ```xml
 <plugin>
