@@ -6,15 +6,19 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.util.Textifier;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 
 public class MyPrinter extends Textifier {
 
-    List<String> operators = Arrays.asList(("IADD,LADD,"
+    List<String> unaryOperators = Arrays.asList(("INEG,LNEG,FNEG,DNEG,").split(","));
+    List<String> binaryOperators = Arrays.asList(("IADD,LADD,"
                     + "FADD,DADD,ISUB,LSUB,FSUB,DSUB,IMUL,LMUL,FMUL,DMUL,IDIV,LDIV,"
-                    + "FDIV,DDIV,IREM,LREM,FREM,DREM,INEG,LNEG,FNEG,DNEG,ISHL,LSHL,"
-                    + "ISHR,LSHR,IUSHR,LUSHR,IAND,LAND,IOR,LOR,IXOR,LXOR,IINC,IF_ICMPNE,IF_ICMPEQ,IF_ICMPNE,IF_ICMPLT,IF_ICMPGE,IF_ICMPGT,IF_ICMPLE").split(","));
+                    + "FDIV,DDIV,IREM,LREM,FREM,DREM,IAND,LAND,IOR,LOR,IXOR,LXORIINC,"
+                    + "IF_ICMPNE,IF_ICMPEQ,IF_ICMPNE,IF_ICMPLT,IF_ICMPGE,IF_ICMPGT,IF_ICMPLE,"
+                    + "ISHL,LSHL,ISHR,LSHR,IUSHR,LUSHR").split(","));
+
     String currentClassMethod;
     String currentClass;
 
@@ -58,6 +62,7 @@ public class MyPrinter extends Textifier {
         super.visitFieldInsn(opcode, owner, name, desc);
     }
 
+
     @Override
     public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
         MetricsManager.addResultMessage(type, currentClassMethod,"Exceptions Referenced:");
@@ -85,6 +90,8 @@ public class MyPrinter extends Textifier {
         }
         if(OPCODES[opcode].equals("INSTANCEOF")){
             MetricsManager.addResultMessage(String.valueOf(opcode),currentClassMethod, "Number of operators:");
+            MetricsManager.addResultMessage("1",currentClassMethod, "Number of operands:");
+            MetricsManager.addResultMessage("1",currentClassMethod, "Number of operands:");
         }
         if(OPCODES[opcode].equals("CHECKCAST")){
             MetricsManager.addResultMessage(String.valueOf(opcode),currentClassMethod, "Number of casts:");
@@ -92,15 +99,33 @@ public class MyPrinter extends Textifier {
         super.visitTypeInsn(opcode, type);
     }
 
+    @Override public void visitJumpInsn(int opcode, Label label) {
+        MetricsManager.addResultMessage("1",currentClassMethod,"Number of loops:");
+        //MetricsManager.addResultMessage(String.valueOf(label),currentClassMethod, "Number of operands:");
+        super.visitJumpInsn(opcode, label);
+    }
+
     @Override public void visitInsn(int opcode) {
         if(OPCODES[opcode].contains("STORE")){
             MetricsManager.addResultMessage(String.valueOf(opcode),currentClassMethod, "Number of expressions:");
             MetricsManager.addResultMessage(String.valueOf(opcode),currentClassMethod, "Number of operators:");
         }
-        if(operators.contains(OPCODES[opcode])){
+        if(unaryOperators.contains(OPCODES[opcode]) || binaryOperators.contains(OPCODES[opcode])){
             MetricsManager.addResultMessage(String.valueOf(opcode),currentClassMethod, "Number of operators:");
         }
+        if(unaryOperators.contains(OPCODES[opcode])){
+            MetricsManager.addResultMessage("1",currentClassMethod, "Number of operands:");
+        }
+        if(binaryOperators.contains(OPCODES[opcode])){
+            MetricsManager.addResultMessage("1",currentClassMethod, "Number of operands:");
+            MetricsManager.addResultMessage("1",currentClassMethod, "Number of operands:");
+        }
         super.visitInsn(opcode);
+    }
+
+    @Override public void visitIntInsn(int opcode, int operand) {
+        MetricsManager.addResultMessage(String.valueOf(operand),currentClassMethod, "Number of operands:");
+        super.visitIntInsn(opcode, operand);
     }
 
     @Override
